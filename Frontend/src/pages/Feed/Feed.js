@@ -59,7 +59,12 @@ class Feed extends Component {
       })
       .then(resData => {
         this.setState({
-          posts: resData.posts,
+          posts: resData.posts.map(post => {
+            return {
+              ...post,
+              imagePath: post.imageUrl
+            };
+          }),
           totalPosts: resData.totalItems,
           postsLoading: false
         });
@@ -114,12 +119,11 @@ class Feed extends Component {
     formData.append("image", postData.image);
 
     let url = "http://localhost:8080/feed/post";
-    if (this.state.editPost) {
-      url = "URL";
-    }
-
-    //
     let method = "POST";
+    if (this.state.editPost) {
+      url = "http://localhost:8080/feed/post/" + this.state.editPost._id;
+      method = "PUT";
+    }
 
     //The following is the way a normal post request is fetched in the frontend
 
