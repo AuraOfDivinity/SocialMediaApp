@@ -105,22 +105,40 @@ class Feed extends Component {
     this.setState({
       editLoading: true
     });
-    // Set up data (with image!)
+
+    // Note the use of formdata
+
+    const formData = new FormData();
+    formData.append("title", postData.title);
+    formData.append("content", postData.content);
+    formData.append("image", postData.image);
+
     let url = "http://localhost:8080/feed/post";
     if (this.state.editPost) {
       url = "URL";
     }
+
+    //
     let method = "POST";
-    fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        title: postData.title,
-        content: postData.content
-      })
-    })
+
+    //The following is the way a normal post request is fetched in the frontend
+
+    // fetch(url, {
+    //   method: method,
+    //   headers: {
+    //     "Content-Type": "application/json"
+    //   },
+    //   body: JSON.stringify({
+    //     title: postData.title,
+    //     content: postData.content
+    //   })
+    // })
+
+    // However since we are dealing with a file upload here we can't set the "Content-Type" header to application/json. Instead we are using the builtin formData object
+    // This object allows us to pass image uploads as if they were submitted through a form. A header need not be set as well because it is automatically set by the object.
+    // The only thing that has to be done is setting the  body to the previously created formData
+
+    fetch(url, { method: method, body: formData })
       .then(res => {
         if (res.status !== 200 && res.status !== 201) {
           throw new Error("Creating or editing a post failed!");

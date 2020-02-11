@@ -11,6 +11,7 @@ router.get("/posts", feedController.getPosts);
 // POST /feed/post
 router.post(
   "/post",
+  // Adding in simple server side validation
   [
     body("title")
       .trim()
@@ -21,5 +22,10 @@ router.post(
   ],
   feedController.createPost
 );
+
+// GET/post/:postId
+router.get("/post/:postId", feedController.getPost);
+
+router.put("/post/:postId");
 
 module.exports = router;
