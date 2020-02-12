@@ -4,12 +4,24 @@ const fs = require("fs");
 const path = require("path");
 
 exports.getPosts = (req, res, next) => {
-  // find will return all the objects stored in the database
+  // Note that the query parameters are stored in the query object instead of the param object
+  const currentPage = req.query.page || 1;
+  const perPage = 3;
+
+  let totalItems;
   Post.find()
+    .countDocuments()
+    .then(count => {
+      totalItems = count;
+      return Post.find()
+        .skip((currentPage - 1) * perPage)
+        .limit(perPage);
+    })
     .then(posts => {
       res.status(200).json({
         message: "Fetched posts successfully",
-        posts: posts
+        posts: posts,
+        totalItems: totalItems
       });
     })
     .catch(err => {
