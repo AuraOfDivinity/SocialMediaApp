@@ -3,6 +3,8 @@ const Post = require("../models/post");
 const fs = require("fs");
 const path = require("path");
 
+const User = require("../models/user");
+
 exports.getPosts = (req, res, next) => {
   // Note that the query parameters are stored in the query object instead of the param object
   const currentPage = req.query.page || 1;
@@ -34,46 +36,47 @@ exports.getPosts = (req, res, next) => {
 
 exports.createPost = (req, res, next) => {
   const errors = validationResult(req);
-
   if (!errors.isEmpty()) {
-    const error = new Error("Validation failed, Entered data is incorrect.");
+    const error = new Error("Validation failed, entered data is incorrect.");
     error.statusCode = 422;
     throw error;
-
-    // Throwing the error will exit the function execeution and will try to reach the next error handling middleware or the function
   }
   if (!req.file) {
-    const error = new Error("No image provided");
+    const error = new Error("No image provided.");
     error.statusCode = 422;
     throw error;
   }
-
-  const imageUrl = req.file.path.replace("\\", "/");
+  const imageUrl = req.file.path;
   const title = req.body.title;
   const content = req.body.content;
-
+  let creator;
   const post = new Post({
     title: title,
     content: content,
-    creator: { name: "Asel" },
-    imageUrl: imageUrl
+    imageUrl: imageUrl,
+    creator: req.userId
   });
-
-  // Post save allows to save the object to database in the cluster
   post
     .save()
     .then(result => {
-      console.log(result);
+      return User.findById(req.userId);
+    })
+    .then(user => {
+      creator = user;
+      user.posts.push(post);
+      return user.save();
+    })
+    .then(result => {
       res.status(201).json({
         message: "Post created successfully!",
-        post: result
+        post: post,
+        creator: { _id: creator._id, name: creator.name }
       });
     })
     .catch(err => {
       if (!err.statusCode) {
         err.statusCode = 500;
       }
-      // Throwing an error would not work here because we are in an asynchronous code snippet. Instead we have to use the next function here and pass the error to the next error handling middleware. (check the error handling middleware in the app.js)
       next(err);
     });
 };
