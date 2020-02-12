@@ -2,15 +2,16 @@ const express = require("express");
 const { body } = require("express-validator");
 
 const feedController = require("../controllers/feed");
-
+const isAuth = require("../middleware/is-auth");
 const router = express.Router();
 
 // GET /feed/posts
-router.get("/posts", feedController.getPosts);
+router.get("/posts", isAuth, feedController.getPosts);
 
 // POST /feed/post
 router.post(
   "/post",
+  isAuth,
   // Adding in simple server side validation
   [
     body("title")
@@ -24,10 +25,11 @@ router.post(
 );
 
 // GET/post/:postId
-router.get("/post/:postId", feedController.getPost);
+router.get("/post/:postId", isAuth, feedController.getPost);
 
 router.put(
   "/post/:postId",
+  isAuth,
   [
     body("title")
       .trim()
@@ -39,4 +41,8 @@ router.put(
   feedController.updatePost
 );
 
-module.exports = router.delete("/post/:postId", feedController.deletePost);
+module.exports = router.delete(
+  "/post/:postId",
+  isAuth,
+  feedController.deletePost
+);
