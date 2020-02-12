@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const path = require("path");
 const multer = require("multer");
 const uuidv4 = require("uuid/v4");
+const cors = require("cors");
 
 const feedRoutes = require("./routes/feed");
 const authRoutes = require("./routes/auth");
@@ -42,15 +43,18 @@ app.use(
 app.use("/images", express.static(path.join(__dirname, "images")));
 
 // Adding the cross origin resource sharing headers (This could be done through the cors library as well)
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "OPTIONS, GET, POST, PUT, PATCH, DELETE"
-  );
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-  next();
-});
+
+// app.use((req, res, next) => {
+//   res.setHeader("Access-Control-Allow-Origin", "*");
+//   res.setHeader(
+//     "Access-Control-Allow-Methods",
+//     "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+//   );
+//   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   next();
+// });
+
+app.use(cors());
 
 app.use("/feed", feedRoutes);
 
